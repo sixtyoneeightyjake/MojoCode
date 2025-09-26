@@ -46,7 +46,7 @@ function getBackgroundCommandErrorLines(commands: Command[]) {
 }
 
 export function useCommandErrorsLogs() {
-  const { commands } = useSandboxStore()
+  const commands = useSandboxStore((state) => state.commands)
   const errors = useMemo(
     () => getBackgroundCommandErrorLines(commands),
     [commands]
@@ -134,10 +134,13 @@ export const useFileExplorerStore = create<FileExplorerStore>()((set) => ({
 }))
 
 export function useDataStateMapper() {
-  const { addPaths, setSandboxId, setUrl, upsertCommand, addGeneratedFiles } =
-    useSandboxStore()
+  const addPaths = useSandboxStore((state) => state.addPaths)
+  const setSandboxId = useSandboxStore((state) => state.setSandboxId)
+  const setUrl = useSandboxStore((state) => state.setUrl)
+  const upsertCommand = useSandboxStore((state) => state.upsertCommand)
+  const addGeneratedFiles = useSandboxStore((state) => state.addGeneratedFiles)
   const { errors } = useCommandErrorsLogs()
-  const { setCursor } = useMonitorState()
+  const setCursor = useMonitorState((state) => state.setCursor)
 
   return (data: DataUIPart<DataPart>) => {
     switch (data.type) {

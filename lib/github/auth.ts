@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import type { Session } from '@supabase/supabase-js'
+import type { User } from '@supabase/supabase-js'
 
 export type GitHubAuthErrorCode =
   | 'not-authenticated'
@@ -13,11 +13,6 @@ export class GitHubAuthError extends Error {
   }
 }
 
-type SessionWithProviderToken = Session & {
-  provider_token?: string | null
-  provider_refresh_token?: string | null
-}
-
 type Identity = {
   provider?: string | null
   identity_data?: Record<string, unknown> | null
@@ -26,26 +21,25 @@ type Identity = {
 interface GitHubSessionResult {
   accessToken: string
   refreshToken: string | null
-  session: SessionWithProviderToken
+  user: User
 }
 
 export async function requireGitHubSession(): Promise<GitHubSessionResult> {
   const supabase = await createSupabaseServerClient()
   const {
-    data: { session },
+    data: { user },
     error,
-  } = await supabase.auth.getSession()
+  } = await supabase.auth.getUser()
 
   if (error) {
     throw new GitHubAuthError('not-authenticated', error.message)
   }
 
-  if (!session) {
+  if (!user) {
     throw new GitHubAuthError('not-authenticated', 'You must be signed in to access GitHub integrations.')
   }
 
-  const extended = session as SessionWithProviderToken
-  const identities = (extended.user as unknown as { identities?: Identity[] | null })?.identities ?? []
+  const identities = (user as unknown as { identities?: Identity[] | null })?.identities ?? []
   const githubIdentity = identities.find((identity) => identity?.provider === 'github') ?? null
 
   if (!githubIdentity) {
@@ -55,11 +49,11 @@ export async function requireGitHubSession(): Promise<GitHubSessionResult> {
     )
   }
 
+  const identityData = githubIdentity.identity_data ?? {}
   const providerToken =
-    extended.provider_token ??
-    (typeof githubIdentity.identity_data?.['access_token'] === 'string'
-      ? (githubIdentity.identity_data['access_token'] as string)
-      : null)
+    typeof identityData['access_token'] === 'string'
+      ? (identityData['access_token'] as string)
+      : null
 
   if (!providerToken) {
     throw new GitHubAuthError(
@@ -70,7 +64,10 @@ export async function requireGitHubSession(): Promise<GitHubSessionResult> {
 
   return {
     accessToken: providerToken,
-    refreshToken: extended.provider_refresh_token ?? null,
-    session: extended,
+    refreshToken:
+      typeof identityData['refresh_token'] === 'string'
+        ? (identityData['refresh_token'] as string)
+        : null,
+    user,
   }
 }

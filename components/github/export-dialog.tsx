@@ -24,10 +24,8 @@ interface ExportDialogProps {
 
 export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
   const { sandboxId, status, mutate } = useGitHubStatus()
-  const { repository, setRepository } = useSandboxStore((state) => ({
-    repository: state.repository,
-    setRepository: state.setRepository,
-  }))
+  const repository = useSandboxStore((state) => state.repository)
+  const setRepository = useSandboxStore((state) => state.setRepository)
 
   const existingFullName = useMemo(() => {
     if (status?.remoteFullName) return status.remoteFullName

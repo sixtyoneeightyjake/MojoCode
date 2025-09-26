@@ -11,7 +11,10 @@ type StreamingCommandLogs = Record<
 >
 
 export function CommandLogsStream() {
-  const { sandboxId, commands, addLog, upsertCommand } = useSandboxStore()
+  const sandboxId = useSandboxStore((state) => state.sandboxId)
+  const commands = useSandboxStore((state) => state.commands)
+  const addLog = useSandboxStore((state) => state.addLog)
+  const upsertCommand = useSandboxStore((state) => state.upsertCommand)
   const ref = useRef<StreamingCommandLogs>({})
 
   useEffect(() => {

@@ -31,7 +31,7 @@ export function Chat({ className }: Props) {
   const { chat } = useSharedChatContext()
   const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
-  const { setChatStatus } = useSandboxStore()
+  const setChatStatus = useSandboxStore((state) => state.setChatStatus)
 
   const validateAndSubmitMessage = useCallback(
     (text: string) => {

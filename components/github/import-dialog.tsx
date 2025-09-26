@@ -39,13 +39,9 @@ function normaliseRepositoryInput(value: string) {
 
 export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
   const { sandboxId, mutate } = useGitHubStatus()
-  const { replacePaths, setSandboxId, setRepository } = useSandboxStore(
-    (state) => ({
-      replacePaths: state.replacePaths,
-      setSandboxId: state.setSandboxId,
-      setRepository: state.setRepository,
-    })
-  )
+  const replacePaths = useSandboxStore((state) => state.replacePaths)
+  const setSandboxId = useSandboxStore((state) => state.setSandboxId)
+  const setRepository = useSandboxStore((state) => state.setRepository)
 
   const [repository, setRepositoryInput] = useState('')
   const [branch, setBranch] = useState('')

@@ -20,7 +20,8 @@ export function Welcome(props: {
   onDismissAction(): void
   defaultOpen: boolean
 }) {
-  const { open, setOpen } = useWelcomeStore()
+  const open = useWelcomeStore((state) => state.open)
+  const setOpen = useWelcomeStore((state) => state.setOpen)
 
   useEffect(() => {
     setOpen(props.defaultOpen)
@@ -89,7 +90,8 @@ export function Welcome(props: {
 }
 
 export function ToggleWelcome() {
-  const { open, setOpen } = useWelcomeStore()
+  const open = useWelcomeStore((state) => state.open)
+  const setOpen = useWelcomeStore((state) => state.setOpen)
   return (
     <Button
       className="cursor-pointer"

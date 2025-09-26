@@ -12,10 +12,10 @@ interface Props {
 export async function Header({ className }: Props) {
   const supabase = await createSupabaseServerClient()
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  const email = session?.user.email
+  const email = user?.email
 
   return (
     <header className={cn('flex items-center justify-between', className)}>

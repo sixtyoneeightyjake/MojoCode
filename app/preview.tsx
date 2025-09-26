@@ -8,7 +8,9 @@ interface Props {
 }
 
 export function Preview({ className }: Props) {
-  const { status, url, urlUUID } = useSandboxStore()
+  const status = useSandboxStore((state) => state.status)
+  const url = useSandboxStore((state) => state.url)
+  const urlUUID = useSandboxStore((state) => state.urlUUID)
   return (
     <PreviewComponent
       key={urlUUID}
