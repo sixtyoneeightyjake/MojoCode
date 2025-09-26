@@ -2,11 +2,13 @@ import { redirect } from 'next/navigation'
 import { SignInForm } from '@/components/auth/sign-in-form'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
-interface SignInPageProps {
-  searchParams?: Record<string, string | string[] | undefined>
-}
+type SearchParams = Record<string, string | string[] | undefined>
 
-export default async function SignInPage({ searchParams }: SignInPageProps) {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams?: Promise<SearchParams>
+}) {
   const supabase = await createSupabaseServerClient()
   const {
     data: { session },
@@ -16,7 +18,8 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
     redirect('/')
   }
 
-  const errorParam = searchParams?.error
+  const resolvedSearchParams = searchParams ? await searchParams : undefined
+  const errorParam = resolvedSearchParams?.error
   const initialError = Array.isArray(errorParam) ? errorParam[0] : errorParam ?? null
 
   return (

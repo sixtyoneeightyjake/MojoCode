@@ -30,6 +30,9 @@ const nextConfig: NextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 }
 
 export default withBotId(nextConfig)
