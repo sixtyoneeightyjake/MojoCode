@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import { ensureChatTables } from '@/lib/supabase/chat-schema'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
@@ -8,9 +9,10 @@ interface RouteParams {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: RouteParams }
+  context: { params: Promise<RouteParams> | RouteParams }
 ) {
   try {
+    const params = await context.params
     const conversationId = params.conversationId
     if (!conversationId) {
       return NextResponse.json({ error: 'Conversation id missing.' }, { status: 400 })
