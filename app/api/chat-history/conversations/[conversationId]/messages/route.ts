@@ -9,11 +9,10 @@ interface RouteParams {
 
 export async function GET(
   _request: NextRequest,
-  context: { params: Promise<RouteParams> | RouteParams }
+  context: { params: Promise<RouteParams> }
 ) {
   try {
-    const params = await context.params
-    const conversationId = params.conversationId
+    const { conversationId } = await context.params
     if (!conversationId) {
       return NextResponse.json({ error: 'Conversation id missing.' }, { status: 400 })
     }
