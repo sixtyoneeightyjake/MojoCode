@@ -30,7 +30,7 @@ export function Chat({ className }: Props) {
   const [input, setInput] = useLocalStorageValue('prompt-input')
   const { chat } = useSharedChatContext()
   const { modelId, reasoningEffort } = useSettings()
-  const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
+  const { messages, sendMessage, status, setMessages } = useChat<ChatUIMessage>({ chat })
   const setChatStatus = useSandboxStore((state) => state.setChatStatus)
 
   const validateAndSubmitMessage = useCallback(
@@ -41,6 +41,26 @@ export function Chat({ className }: Props) {
       }
     },
     [sendMessage, modelId, setInput, reasoningEffort]
+  )
+
+  const appendSystemMessage = useCallback(
+    (text: string) => {
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          parts: [
+            {
+              type: 'text',
+              text,
+            },
+          ],
+          metadata: { model: 'supabase-bootstrap' },
+        },
+      ])
+    },
+    [setMessages]
   )
 
   useEffect(() => {
@@ -95,7 +115,7 @@ export function Chat({ className }: Props) {
           validateAndSubmitMessage(input)
         }}
       >
-        <Settings />
+        <Settings onAppendSystemMessage={appendSystemMessage} />
         <ModelSelector />
         <Input
           className="w-full font-mono text-sm rounded-sm border-0 bg-background"
@@ -105,7 +125,7 @@ export function Chat({ className }: Props) {
           value={input}
         />
         <Button type="submit" disabled={status !== 'ready' || !input.trim()}>
-        <SendIcon className="w-4 h-4" />
+          <SendIcon className="w-4 h-4" />
         </Button>
       </form>
     </Panel>
