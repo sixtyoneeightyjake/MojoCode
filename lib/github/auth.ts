@@ -1,3 +1,4 @@
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import type { User } from '@supabase/supabase-js'
 
@@ -18,10 +19,51 @@ type Identity = {
   identity_data?: Record<string, unknown> | null
 }
 
+interface ProviderTokens {
+  accessToken: string | null
+  refreshToken: string | null
+}
+
 interface GitHubSessionResult {
   accessToken: string
   refreshToken: string | null
   user: User
+}
+
+function extractProviderTokens(identity: Identity | null): ProviderTokens {
+  const identityData = identity?.identity_data ?? {}
+
+  const accessToken =
+    typeof identityData['access_token'] === 'string'
+      ? (identityData['access_token'] as string)
+      : null
+
+  const refreshToken =
+    typeof identityData['refresh_token'] === 'string'
+      ? (identityData['refresh_token'] as string)
+      : null
+
+  return { accessToken, refreshToken }
+}
+
+async function fetchAdminIdentity(userId: string) {
+  const supabaseAdmin = createSupabaseAdminClient()
+  if (!supabaseAdmin) {
+    return null
+  }
+  const { data, error } = await supabaseAdmin.auth.admin.getUserById(userId)
+
+  if (error) {
+    console.error('[github-auth] Failed to load user via admin client', error)
+    return null
+  }
+
+  const adminIdentity =
+    (data?.user as unknown as { identities?: Identity[] | null })?.identities?.find(
+      (identity) => identity?.provider === 'github'
+    ) ?? null
+
+  return adminIdentity
 }
 
 export async function requireGitHubSession(): Promise<GitHubSessionResult> {
@@ -49,11 +91,16 @@ export async function requireGitHubSession(): Promise<GitHubSessionResult> {
     )
   }
 
-  const identityData = githubIdentity.identity_data ?? {}
-  const providerToken =
-    typeof identityData['access_token'] === 'string'
-      ? (identityData['access_token'] as string)
-      : null
+  let { accessToken: providerToken, refreshToken } = extractProviderTokens(githubIdentity)
+
+  if (!providerToken) {
+    const adminIdentity = await fetchAdminIdentity(user.id)
+    if (adminIdentity) {
+      const adminTokens = extractProviderTokens(adminIdentity)
+      providerToken = adminTokens.accessToken
+      refreshToken = refreshToken ?? adminTokens.refreshToken
+    }
+  }
 
   if (!providerToken) {
     throw new GitHubAuthError(
@@ -64,10 +111,7 @@ export async function requireGitHubSession(): Promise<GitHubSessionResult> {
 
   return {
     accessToken: providerToken,
-    refreshToken:
-      typeof identityData['refresh_token'] === 'string'
-        ? (identityData['refresh_token'] as string)
-        : null,
+    refreshToken,
     user,
   }
 }
