@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       try {
         const output = await git(['rev-parse', '--is-inside-work-tree'])
         return output.trim() === 'true'
-      } catch (error) {
+      } catch {
         return false
       }
     })()
@@ -50,14 +50,14 @@ export async function GET(request: Request) {
       try {
         const statusOutput = await git(['status', '--porcelain'])
         hasChanges = statusOutput.trim().length > 0
-      } catch (error) {
+      } catch {
         hasChanges = false
       }
 
       try {
         const branchOutput = await git(['rev-parse', '--abbrev-ref', 'HEAD'])
         branch = branchOutput.trim()
-      } catch (error) {
+      } catch {
         branch = null
       }
 
@@ -73,7 +73,7 @@ export async function GET(request: Request) {
         } else {
           remoteFullName = null
         }
-      } catch (error) {
+      } catch {
         remoteUrl = null
         remoteFullName = null
       }
@@ -84,7 +84,7 @@ export async function GET(request: Request) {
           .split('\n')
           .map((file) => file.trim())
           .filter(Boolean)
-      } catch (error) {
+      } catch {
         trackedFiles = []
       }
     }

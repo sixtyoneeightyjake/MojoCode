@@ -1,4 +1,3 @@
-import { ToggleWelcome } from '@/components/modals/welcome'
 import { VercelDashed } from '@/components/icons/vercel-dashed'
 import { cn } from '@/lib/utils'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
@@ -31,7 +30,6 @@ export async function Header({ className }: Props) {
         ) : null}
         <GitHubMenu />
         <SignOutButton />
-        <ToggleWelcome />
       </div>
     </header>
   )

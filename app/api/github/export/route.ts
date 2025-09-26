@@ -169,7 +169,7 @@ export async function POST(request: Request) {
     try {
       const branchRes = await runGit(['rev-parse', '--abbrev-ref', 'HEAD'])
       currentBranch = (await branchRes.stdout()).trim()
-    } catch (error) {
+    } catch {
       currentBranch = ''
     }
 
@@ -179,7 +179,7 @@ export async function POST(request: Request) {
     } else if (currentBranch !== branchName) {
       try {
         await runGit(['checkout', branchName])
-      } catch (error) {
+      } catch {
         await runGit(['checkout', '-b', branchName])
       }
     }

@@ -22,9 +22,14 @@ export async function createSupabaseServerClient() {
         },
         set(_name: string, _value: string, _options: CookieOptions) {
           // The server component cookies API does not allow setting values
+          void _name
+          void _value
+          void _options
         },
         remove(_name: string, _options: CookieOptions) {
           // The server component cookies API does not allow removing values
+          void _name
+          void _options
         },
       },
     }

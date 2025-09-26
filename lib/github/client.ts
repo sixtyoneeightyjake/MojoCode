@@ -55,7 +55,7 @@ export async function githubRequest<T = unknown>(
       if (body && typeof body.message === 'string') {
         message = body.message
       }
-    } catch (error) {
+    } catch {
       // ignore json parse errors
     }
     throw new GitHubAPIError(response.status, response.url, message)

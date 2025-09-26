@@ -1,6 +1,14 @@
 export class Deferred<T> {
-  private resolveFn: (value: T | PromiseLike<T>) => void = () => {}
-  private rejectFn: (reason?: any) => void = () => {}
+  // resolveFn/rejectFn are initialized to typed no-ops to avoid using `any`.
+  private resolveFn: (value: T | PromiseLike<T>) => void = (
+    _value: T | PromiseLike<T>
+  ) => {
+    // explicitly reference the parameter to satisfy no-unused-vars rules
+    void _value
+  }
+  private rejectFn: (reason?: unknown) => void = (_reason?: unknown) => {
+    void _reason
+  }
   private _promise: Promise<T>
 
   constructor() {
@@ -10,7 +18,7 @@ export class Deferred<T> {
     })
   }
 
-  get promise() {
+  get promise(): Promise<T> {
     return this._promise
   }
 
@@ -18,7 +26,7 @@ export class Deferred<T> {
     this.resolveFn(value)
   }
 
-  reject(reason?: any): void {
+  reject(reason?: unknown): void {
     this.rejectFn(reason)
   }
 }
