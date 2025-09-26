@@ -7,7 +7,11 @@ import type { LanguageModelV2 } from '@ai-sdk/provider'
 export async function getAvailableModels() {
   const gateway = gatewayInstance()
   const response = await gateway.getAvailableModels()
-  const mapped = response.models.map((model) => ({ id: model.id, name: model.name }))
+  // Normalize names: prefer our friendly MODEL_LABELS when we know the id.
+  const mapped = response.models.map((model) => ({
+    id: model.id,
+    name: MODEL_LABELS[model.id as unknown as Models] ?? model.name,
+  }))
 
   // If the gateway doesn't already include our GPT-5 entry, append it using a friendly label.
   if (!mapped.some((m) => m.id === Models.OpenAIGPT5)) {
