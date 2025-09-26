@@ -14,17 +14,32 @@ interface SignInFormProps {
 }
 
 export function SignInForm({ initialError = null }: SignInFormProps) {
-  const supabase = useMemo(() => createSupabaseBrowserClient(), [])
+  const supabase = useMemo(() => {
+    try {
+      return createSupabaseBrowserClient()
+    } catch (error) {
+      console.error('Failed to initialize Supabase client:', error)
+      return null
+    }
+  }, [])
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(initialError)
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    initialError || (!supabase ? 'Unable to initialize authentication client' : null)
+  )
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErrorMessage(null)
     setIsLoading(true)
+
+    if (!supabase) {
+      setErrorMessage('Authentication client is not initialized')
+      setIsLoading(false)
+      return
+    }
 
     try {
       const { error } = await supabase.auth.signInWithPassword({

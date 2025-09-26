@@ -1,18 +1,19 @@
 'use client'
 
 import { createBrowserClient } from '@supabase/ssr'
+import { getSupabaseConfig } from './config'
 
-function getEnvVar(key: string) {
-  const value = process.env[key]
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`)
-  }
-  return value
-}
+let browserClient: ReturnType<typeof createBrowserClient> | null = null
 
 export function createSupabaseBrowserClient() {
-  return createBrowserClient(
-    getEnvVar('NEXT_PUBLIC_SUPABASE_URL'),
-    getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY')
-  )
+  if (browserClient) return browserClient
+
+  const config = getSupabaseConfig()
+  
+  if (!config.url || !config.anonKey) {
+    throw new Error('Missing required Supabase configuration')
+  }
+
+  browserClient = createBrowserClient(config.url, config.anonKey)
+  return browserClient
 }
