@@ -31,7 +31,7 @@ export function GitHubMenu() {
 
   const statusMessage = useMemo(() => {
     if (!hasSandbox) {
-      return 'Start a coding session before importing a repository.'
+      return 'Import a repository to spin up a coding workspace.'
     }
     if (isLoading) {
       return 'Detecting Git status…'
@@ -59,7 +59,6 @@ export function GitHubMenu() {
         <PopoverContent align="end" className="w-64 space-y-3">
           <div className="space-y-2">
             <ActionButton
-              disabled={!hasSandbox}
               onClick={() => {
                 setIsPopoverOpen(false)
                 setIsImportOpen(true)
