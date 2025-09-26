@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createSupabasePgClient, getSupabaseDatabaseUrl } from '@/lib/db'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { ensureChatTables } from '@/lib/supabase/chat-schema'
 
 class HttpError extends Error {
   constructor(public readonly status: number, message: string) {
@@ -60,28 +61,6 @@ function getServiceRoleKey() {
   return key
 }
 
-const BOOTSTRAP_SQL = `
-  create extension if not exists "uuid-ossp";
-
-  create table if not exists conversations (
-    id uuid primary key default uuid_generate_v4(),
-    user_id uuid,
-    title text,
-    created_at timestamptz not null default now()
-  );
-
-  create table if not exists messages (
-    id uuid primary key default uuid_generate_v4(),
-    conversation_id uuid not null references conversations(id) on delete cascade,
-    role text not null check (role in ('user','assistant','system')),
-    content text not null,
-    created_at timestamptz not null default now()
-  );
-
-  create index if not exists idx_messages_conversation_id on messages(conversation_id);
-  create index if not exists idx_messages_created_at on messages(created_at);
-`
-
 const SAMPLE_CONVERSATION_ID = '00000000-0000-4000-8000-000000000001'
 const SAMPLE_USER_MESSAGE_ID = '00000000-0000-4000-8000-000000000002'
 const SAMPLE_ASSISTANT_MESSAGE_ID = '00000000-0000-4000-8000-000000000003'
@@ -109,7 +88,6 @@ export async function POST(request: Request) {
       )
     }
 
-    const client = createSupabasePgClient({ connectionString })
     const steps: string[] = []
     const warnings: string[] = []
 
@@ -119,17 +97,17 @@ export async function POST(request: Request) {
       warnings.push('Running without ADMIN_EMAIL in development mode.')
     }
 
-    await client.connect()
-    steps.push('Connected to Supabase Postgres')
+    await ensureChatTables()
+    steps.push('Ensured conversations/messages schema')
 
-    try {
-      await client.query('begin')
-      steps.push('Transaction opened')
+    if (seed) {
+      const client = createSupabasePgClient({ connectionString })
+      await client.connect()
+      steps.push('Connected for seeding')
 
-      await client.query(BOOTSTRAP_SQL)
-      steps.push('Ensured conversations/messages schema')
+      try {
+        await client.query('begin')
 
-      if (seed) {
         const {
           rowCount: conversationInsertCount,
         } = await client.query(
@@ -169,15 +147,15 @@ export async function POST(request: Request) {
         } else {
           warnings.push('Demo messages already exist; skipped seeding messages.')
         }
-      }
 
-      await client.query('commit')
-      steps.push('Transaction committed')
-    } catch (error) {
-      await client.query('rollback').catch(() => undefined)
-      throw error
-    } finally {
-      await client.end().catch(() => undefined)
+        await client.query('commit')
+        steps.push('Seeding transaction committed')
+      } catch (error) {
+        await client.query('rollback').catch(() => undefined)
+        throw error
+      } finally {
+        await client.end().catch(() => undefined)
+      }
     }
 
     return NextResponse.json({ ok: true, steps, warnings })
