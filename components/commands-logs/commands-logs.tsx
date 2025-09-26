@@ -23,7 +23,7 @@ export function CommandsLogs(props: Props) {
       <PanelHeader>
         <SquareChevronRight className="mr-2 w-4" />
         <span className="font-mono uppercase font-semibold">
-          Sandbox Remote Output
+          MojoCode Terminal
         </span>
       </PanelHeader>
       <div className="h-[calc(100%-2rem)]">

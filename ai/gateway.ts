@@ -9,7 +9,7 @@ export async function getAvailableModels() {
   const response = await gateway.getAvailableModels()
   return response.models
     .map((model) => ({ id: model.id, name: model.name }))
-    .concat([{ id: Models.OpenAIGPT5, name: 'GPT-5' }])
+    .concat([{ id: Models.OpenAIGPT5, name: 'GPT-5-codex' }])
 }
 
 export interface ModelOptions {

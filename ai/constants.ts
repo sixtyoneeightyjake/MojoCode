@@ -1,26 +1,32 @@
 import { type GatewayModelId } from '@ai-sdk/gateway'
 
 export enum Models {
-  AmazonNovaPro = 'amazon/nova-pro',
+  Qwen3Coder = 'alibaba/qwen3-coder',
   AnthropicClaude4Sonnet = 'anthropic/claude-4-sonnet',
-  GoogleGeminiFlash = 'google/gemini-2.5-flash',
-  MoonshotKimiK2 = 'moonshotai/kimi-k2',
-  OpenAIGPT5 = 'gpt-5',
-  XaiGrok3Fast = 'xai/grok-3-fast',
+  GoogleGeminiFlash = 'google/gemini-2.5-flash-latest',
+  GPTOSS120 = 'openai/gpt-oss-120B',
+  OpenAIGPT5 = 'openai/gpt-5-codex',
+  XaiGrokCodeFast = 'xai/grok-code-fast-1',
+  GoogleGeminiPro = 'google/gemini-2.5-pro',
+  OpenAIo4mini = 'openai/o4-mini',
+  Vercelv0 = 'vercel/v0-1.5-md'
 }
 
 export const DEFAULT_MODEL = Models.OpenAIGPT5
 
 export const SUPPORTED_MODELS: GatewayModelId[] = [
-  Models.AmazonNovaPro,
+  Models.Qwen3Coder,
   Models.AnthropicClaude4Sonnet,
   Models.GoogleGeminiFlash,
-  Models.MoonshotKimiK2,
+  Models.GPTOSS120,
   Models.OpenAIGPT5,
-  Models.XaiGrok3Fast,
+  Models.XaiGrokCodeFast,
+  Models.GoogleGeminiPro,
+  Models.OpenAIo4mini,
+  Models.Vercelv0,
 ]
 
 export const TEST_PROMPTS = [
   'Generate a Next.js app that allows to list and search Pokemons',
-  'Create a `golang` server that responds with "Hello World" to any request',
+  'Create a landing page for a upcoming nudist paintball event benefiting Nudists for Hugs foundation',
 ]
