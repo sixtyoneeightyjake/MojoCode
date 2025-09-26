@@ -100,7 +100,8 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
       generatedFiles: new Set<string>(),
       repository: null,
     })),
-  setStatus: (status) => set(() => ({ status })),
+  setStatus: (status) =>
+    set((state) => (state.status === status ? state : { status })),
   setRepository: (repository) => set(() => ({ repository })),
   setUrl: (url, urlUUID) => set(() => ({ url, urlUUID })),
   upsertCommand: (cmd) => {
