@@ -1,3 +1,5 @@
+'use client'
+
 import type { Command, CommandLog } from '@/components/commands-logs/types'
 import type { DataPart } from '@/ai/messages/data-parts'
 import type { ChatStatus, DataUIPart } from 'ai'
