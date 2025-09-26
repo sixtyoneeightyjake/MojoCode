@@ -1,9 +1,8 @@
 import { type GatewayModelId } from '@ai-sdk/gateway'
 
 export enum Models {
-  Qwen3Coder = 'alibaba/qwen3-coder',
+  
   AnthropicClaude4Sonnet = 'anthropic/claude-4-sonnet',
-  GoogleGeminiFlash = 'google/gemini-2.5-flash-latest',
   GPTOSS120 = 'openai/gpt-oss-120B',
   OpenAIGPT5 = 'openai/gpt-5-codex',
   XaiGrokCodeFast = 'xai/grok-code-fast-1',
@@ -15,10 +14,8 @@ export enum Models {
 export const DEFAULT_MODEL = Models.OpenAIGPT5
 
 export const SUPPORTED_MODELS: GatewayModelId[] = [
-  Models.Qwen3Coder,
+ 
   Models.AnthropicClaude4Sonnet,
-  Models.GoogleGeminiFlash,
-  Models.GPTOSS120,
   Models.OpenAIGPT5,
   Models.XaiGrokCodeFast,
   Models.GoogleGeminiPro,
@@ -30,3 +27,13 @@ export const TEST_PROMPTS = [
   'Generate a Next.js app that allows to list and search Pokemons',
   'Create a landing page for a upcoming nudist paintball event benefiting Nudists for Hugs foundation',
 ]
+
+export const MODEL_LABELS: Record<Models, string> = {
+  [Models.AnthropicClaude4Sonnet]: 'Claude 4 Sonnet',
+  [Models.GPTOSS120]: 'gpt-oss-120B',
+  [Models.OpenAIGPT5]: 'GPT-5',
+  [Models.XaiGrokCodeFast]: 'xAI Grok Code Fast',
+  [Models.GoogleGeminiPro]: 'Gemini Pro',
+  [Models.OpenAIo4mini]: 'o4-mini',
+  [Models.Vercelv0]: 'Vercel v0',
+}
