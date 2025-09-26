@@ -1,0 +1,35 @@
+import { redirect } from 'next/navigation'
+import { SignInForm } from '@/components/auth/sign-in-form'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+
+interface SignInPageProps {
+  searchParams?: Record<string, string | string[] | undefined>
+}
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (session) {
+    redirect('/')
+  }
+
+  const errorParam = searchParams?.error
+  const initialError = Array.isArray(errorParam) ? errorParam[0] : errorParam ?? null
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <div className="w-full max-w-md space-y-6 rounded-xl border border-border/70 bg-card p-8 shadow-sm">
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+          <p className="text-sm text-muted-foreground">
+            Sign in with your email, Google, or GitHub account.
+          </p>
+        </div>
+        <SignInForm initialError={initialError} />
+      </div>
+    </div>
+  )
+}

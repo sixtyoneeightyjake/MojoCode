@@ -7,10 +7,21 @@ import { Preview } from './preview'
 import { TabContent, TabItem } from '@/components/tabs'
 import { Welcome } from '@/components/modals/welcome'
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { getHorizontal, getVertical } from '@/components/layout/sizing'
 import { hideBanner } from '@/app/actions'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export default async function Page() {
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session) {
+    redirect('/sign-in')
+  }
+
   const store = await cookies()
   const banner = store.get('banner-hidden')?.value !== 'true'
   const horizontalSizes = getHorizontal(store)
