@@ -1,6 +1,6 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import type { User } from '@supabase/supabase-js'
+import type { SupabaseClient, User } from '@supabase/supabase-js'
 
 export type GitHubAuthErrorCode =
   | 'not-authenticated'
@@ -66,6 +66,33 @@ async function fetchAdminIdentity(userId: string) {
   return adminIdentity
 }
 
+async function fetchSessionTokens(supabase: SupabaseClient): Promise<ProviderTokens> {
+  try {
+    const { data, error } = await supabase.auth.getSession()
+    if (error) {
+      console.warn('[github-auth] Failed to read session while fetching provider token', error)
+      return { accessToken: null, refreshToken: null }
+    }
+
+    const session = data.session
+    if (!session) {
+      return { accessToken: null, refreshToken: null }
+    }
+
+    return {
+      accessToken:
+        typeof session.provider_token === 'string' ? (session.provider_token as string) : null,
+      refreshToken:
+        typeof session.provider_refresh_token === 'string'
+          ? (session.provider_refresh_token as string)
+          : null,
+    }
+  } catch (error) {
+    console.error('[github-auth] Unexpected error reading provider token from session', error)
+    return { accessToken: null, refreshToken: null }
+  }
+}
+
 export async function requireGitHubSession(): Promise<GitHubSessionResult> {
   const supabase = await createSupabaseServerClient()
   const {
@@ -91,7 +118,13 @@ export async function requireGitHubSession(): Promise<GitHubSessionResult> {
     )
   }
 
-  let { accessToken: providerToken, refreshToken } = extractProviderTokens(githubIdentity)
+  let { accessToken: providerToken, refreshToken } = await fetchSessionTokens(supabase)
+
+  if (!providerToken) {
+    const identityTokens = extractProviderTokens(githubIdentity)
+    providerToken = identityTokens.accessToken
+    refreshToken = refreshToken ?? identityTokens.refreshToken
+  }
 
   if (!providerToken) {
     const adminIdentity = await fetchAdminIdentity(user.id)
