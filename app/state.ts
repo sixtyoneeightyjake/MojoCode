@@ -5,6 +5,12 @@ import { useMonitorState } from '@/components/error-monitor/state'
 import { useMemo } from 'react'
 import { create } from 'zustand'
 
+interface SandboxRepositoryInfo {
+  branch: string | null
+  fullName: string | null
+  remoteUrl: string | null
+}
+
 interface SandboxStore {
   addGeneratedFiles: (files: string[]) => void
   addLog: (data: { sandboxId: string; cmdId: string; log: CommandLog }) => void
@@ -14,8 +20,11 @@ interface SandboxStore {
   commands: Command[]
   generatedFiles: Set<string>
   paths: string[]
+  replacePaths: (paths: string[]) => void
+  repository: SandboxRepositoryInfo | null
   sandboxId?: string
   setChatStatus: (status: ChatStatus) => void
+  setRepository: (repository: SandboxRepositoryInfo | null) => void
   setSandboxId: (id: string) => void
   setStatus: (status: 'running' | 'stopped') => void
   setUrl: (url: string, uuid: string) => void
@@ -70,6 +79,11 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
   commands: [],
   generatedFiles: new Set<string>(),
   paths: [],
+  replacePaths: (paths) =>
+    set(() => ({
+      paths: [...new Set(paths)],
+    })),
+  repository: null,
   setChatStatus: (status) =>
     set((state) =>
       state.chatStatus === status ? state : { chatStatus: status }
@@ -82,8 +96,10 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
       paths: [],
       url: undefined,
       generatedFiles: new Set<string>(),
+      repository: null,
     })),
   setStatus: (status) => set(() => ({ status })),
+  setRepository: (repository) => set(() => ({ repository })),
   setUrl: (url, urlUUID) => set(() => ({ url, urlUUID })),
   upsertCommand: (cmd) => {
     set((state) => {

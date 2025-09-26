@@ -25,6 +25,12 @@ const providerConfig: Record<Provider, { label: string; icon?: React.ComponentTy
   },
 }
 
+const providerOptions: Partial<Record<Provider, { scopes?: string }>> = {
+  github: {
+    scopes: 'repo read:user user:email',
+  },
+}
+
 export function OAuthButtons({ redirectPath = '/', onError }: OAuthButtonsProps) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), [])
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null)
@@ -44,6 +50,7 @@ export function OAuthButtons({ redirectPath = '/', onError }: OAuthButtonsProps)
         provider,
         options: {
           redirectTo: callbackUrl.toString(),
+          scopes: providerOptions[provider]?.scopes,
         },
       })
 

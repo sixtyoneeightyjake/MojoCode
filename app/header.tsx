@@ -3,6 +3,7 @@ import { VercelDashed } from '@/components/icons/vercel-dashed'
 import { cn } from '@/lib/utils'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { SignOutButton } from '@/components/auth/sign-out-button'
+import { GitHubMenu } from '@/components/github/github-menu'
 
 interface Props {
   className?: string
@@ -28,6 +29,7 @@ export async function Header({ className }: Props) {
         {email ? (
           <span className="hidden text-xs text-muted-foreground sm:inline-block">{email}</span>
         ) : null}
+        <GitHubMenu />
         <SignOutButton />
         <ToggleWelcome />
       </div>
