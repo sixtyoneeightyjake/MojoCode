@@ -1,5 +1,5 @@
 import { createGatewayProvider } from '@ai-sdk/gateway'
-import { Models } from './constants'
+import { Models, MODEL_LABELS } from './constants'
 import type { JSONValue } from 'ai'
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
@@ -7,9 +7,24 @@ import type { LanguageModelV2 } from '@ai-sdk/provider'
 export async function getAvailableModels() {
   const gateway = gatewayInstance()
   const response = await gateway.getAvailableModels()
-  return response.models
-    .map((model) => ({ id: model.id, name: model.name }))
-    .concat([{ id: Models.OpenAIGPT5, name: 'GPT-5-codex' }])
+  const mapped = response.models.map((model) => ({ id: model.id, name: model.name }))
+
+  // If the gateway doesn't already include our GPT-5 entry, append it using a friendly label.
+  if (!mapped.some((m) => m.id === Models.OpenAIGPT5)) {
+    mapped.push({ id: Models.OpenAIGPT5, name: MODEL_LABELS[Models.OpenAIGPT5] ?? 'GPT-5-codex' })
+  }
+
+  // Dedupe by id, preserving the first occurrence's name (gateway prefers its name).
+  const seen = new Set<string>()
+  const deduped: { id: string; name: string }[] = []
+  for (const m of mapped) {
+    if (!seen.has(m.id)) {
+      seen.add(m.id)
+      deduped.push(m)
+    }
+  }
+
+  return deduped
 }
 
 export interface ModelOptions {
